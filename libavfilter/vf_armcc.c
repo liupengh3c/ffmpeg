@@ -5,12 +5,16 @@
 #include "formats.h"
 #include "internal.h"
 #include "video.h"
+#include "libswscale/swscale.h"
 
 typedef struct TransformContext
 {
     const AVClass *class;
     int backUp;
     //add some private data if you want
+    struct SwsContext *sws_ctx;
+    char *w_expr;
+    char *h_expr;
 } TransformContext;
 
 typedef struct ThreadData
@@ -135,6 +139,7 @@ static int filter_frame(AVFilterLink *link, AVFrame *in)
 
     av_frame_free(&in);
 
+    // 用于两个filter之间包的传递，该函数将包放入输出filter_link
     return ff_filter_frame(outlink, out);
 }
 
@@ -186,6 +191,8 @@ static int query_formats(AVFilterContext *ctx)
 
 static const AVOption transform_options[] = {
     {"backUp", "a backup parameters, NOT use so far", OFFSET(backUp), AV_OPT_TYPE_STRING, {.str = "0"}, CHAR_MIN, CHAR_MAX, FLAGS},
+    // {"w", "Output video width", OFFSET(w_expr), AV_OPT_TYPE_STRING, .flags = TFLAGS},
+    // {"width", "Output video width", OFFSET(w_expr), AV_OPT_TYPE_STRING, .flags = TFLAGS},
     {NULL}
 
 }; // TODO: add something if needed
